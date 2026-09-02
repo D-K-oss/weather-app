@@ -1,0 +1,9 @@
+{
+  "name": "clima-weather-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Python stdlib weather mini-service for Clima (Open-Meteo proxy with cache)",
+  "scripts": {
+    "dev": "python3 dev.py"
+  }
+}

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" data-theme="minimal">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Clima — a lightweight weather app with 15-day forecast, hourly changes, favorites and themes.">
+  <meta name="theme-color" content="#d97706">
+  <title>Clima · Weather</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div id="effects" class="wx-effects" aria-hidden="true"></div>
+  <div id="golden" class="wx-golden" aria-hidden="true" hidden></div>
+
+  <div class="app">
+    <header class="topbar" id="topbar">
+      <div class="brand">
+        <img class="brand-mark" src="logo.svg" alt="" width="34" height="34">
+        <span class="brand-name">Clima</span>
+      </div>
+
+      <div class="searchbox" role="search">
+        <div class="search-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search" type="search" placeholder="Search city… ( / )" autocomplete="off" spellcheck="false"
+                 role="combobox" aria-expanded="false" aria-controls="results" aria-label="Search for a city">
+          <button id="locate" class="iconbtn" type="button" title="Use my location" aria-label="Use my location">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          </button>
+        </div>
+        <ul id="results" class="results" role="listbox" aria-label="Search results" hidden></ul>
+      </div>
+
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Temperature units">
+          <button type="button" data-unit="metric" role="radio" aria-checked="true" title="Celsius · km/h">°C</button>
+          <button type="button" data-unit="imperial" role="radio" aria-checked="false" title="Fahrenheit · mph">°F</button>
+        </div>
+        <div class="seg themes" role="radiogroup" aria-label="Theme">
+          <button type="button" data-theme-choice="auto" role="radio" aria-checked="false" title="Auto — light by day, dark by night">Auto</button>
+          <button type="button" data-theme-choice="minimal" role="radio" aria-checked="true" title="Minimal">Min</button>
+          <button type="button" data-theme-choice="dark" role="radio" aria-checked="false" title="Dark">Dark</button>
+          <button type="button" data-theme-choice="paper" role="radio" aria-checked="false" title="Paper">Paper</button>
+          <button type="button" data-theme-choice="retro" role="radio" aria-checked="false" title="Retro CRT">CRT</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="banner" class="banner" role="status" hidden></section>
+
+      <section id="chips" class="chips" aria-label="Favorite cities" hidden></section>
+
+      <section id="loading" class="card loading-card" aria-label="Loading weather" hidden>
+        <div class="skeleton sk-hero"></div>
+        <div class="skeleton sk-line" style="width:70%"></div>
+        <div class="skeleton sk-line" style="width:45%"></div>
+        <div class="skeleton sk-line" style="width:85%"></div>
+      </section>
+
+      <section id="error" class="card error-card" role="alert" hidden></section>
+
+      <div id="content" hidden>
+        <div class="meta-line" id="meta-line">
+          <span class="meta-clock" id="meta-clock"></span>
+          <span class="meta-updated" id="meta-updated"></span>
+          <span class="meta-grow"></span>
+          <button id="share" class="iconbtn" type="button" title="Share weather summary" aria-label="Share weather summary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
+          <button id="refresh-top" class="iconbtn" type="button" title="Refresh now" aria-label="Refresh weather data">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          </button>
+        </div>
+
+        <section id="alerts" aria-label="Weather alerts" aria-live="polite" hidden></section>
+
+        <section class="card hero" aria-label="Current weather">
+          <div class="hero-top">
+            <div class="hero-place">
+              <h1 id="place-name">—</h1>
+              <p class="hero-sub" id="place-sub">—</p>
+            </div>
+            <button id="pin" class="iconbtn starbtn" type="button" title="Pin this city" aria-label="Pin this city" aria-pressed="false">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.2a.6.6 0 0 1 1 0l2.6 5.2 5.8.9a.6.6 0 0 1 .3 1l-4.2 4.1 1 5.8a.6.6 0 0 1-.8.6l-5.2-2.7-5.2 2.7a.6.6 0 0 1-.8-.6l1-5.8L2.8 10.3a.6.6 0 0 1 .3-1l5.8-.9z"/></svg>
+            </button>
+          </div>
+
+          <div class="hero-main">
+            <span class="hero-icon" id="hero-icon" aria-hidden="true"></span>
+            <div class="hero-temp" id="hero-temp">—</div>
+            <div class="hero-cond">
+              <div class="cond-label" id="cond-label">—</div>
+              <div class="cond-feels" id="cond-feels">—</div>
+              <div class="cond-range" id="cond-range">—</div>
+            </div>
+          </div>
+
+          <div class="details" id="hero-details"></div>
+
+          <div class="sun-row" id="sun-row"></div>
+        </section>
+
+        <section id="insights" aria-label="Today's insights" hidden></section>
+
+        <div class="grid2">
+          <section class="card" aria-label="Air quality" id="aqi-card">
+            <h2>Air quality <span class="h2-extra" id="aqi-extra"></span></h2>
+            <div id="aqi-row"></div>
+          </section>
+
+          <section class="card" aria-label="Daylight" id="daylight-card">
+            <h2>Daylight <span class="h2-extra" id="daylight-extra"></span></h2>
+            <div id="daylight-row"></div>
+          </section>
+        </div>
+
+        <div class="grid2">
+          <section class="card" aria-label="Wind" id="wind-card">
+            <h2>Wind <span class="h2-extra" id="wind-extra"></span></h2>
+            <div id="wind-row"></div>
+          </section>
+
+          <section class="card" aria-label="Past 7 days" id="history-card">
+            <h2>Past 7 days <span class="h2-extra" id="history-extra"></span></h2>
+            <div id="history-row"></div>
+          </section>
+        </div>
+
+        <div class="grid2">
+          <section class="card" aria-label="Rain outlook" id="rain-card">
+            <h2>Rain outlook <span class="h2-extra" id="rain-extra"></span></h2>
+            <div id="rain-row"></div>
+          </section>
+
+          <section class="card" aria-label="Precipitation nowcast" id="nowcast-card">
+            <h2>Nowcast <span class="h2-extra" id="nowcast-extra"></span></h2>
+            <div id="nowcast-row"></div>
+          </section>
+        </div>
+
+        <section class="card" aria-label="Best time outside" id="plan-card">
+          <h2>Best time outside <span class="h2-extra" id="plan-extra"></span></h2>
+          <div id="plan-row"></div>
+        </section>
+
+        <section class="card" aria-label="Hour by hour forecast">
+          <h2>Hour by hour <span class="h2-extra" id="hourly-extra"></span></h2>
+          <div class="hourly-scroll" id="hourly" role="list"></div>
+        </section>
+
+        <section class="card" aria-label="Multi day forecast">
+          <h2 id="daily-title">15-day forecast</h2>
+          <div class="daily-rows" id="daily"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <img src="logo.svg" alt="" width="18" height="18">
+      <span>Data by Open-Meteo</span>
+      <span id="foot-extra"></span>
+      <span class="foot-grow"></span>
+      <span id="updated"></span>
+      <button id="refresh" class="iconbtn" type="button" title="Refresh now" aria-label="Refresh now">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
+    </footer>
+  </div>
+
+  <dialog id="compare-dialog" class="compare-dialog" aria-label="Compare favorite cities">
+    <div class="compare-head">
+      <h2>Compare favorites</h2>
+      <button id="compare-close" class="iconbtn" type="button" title="Close" aria-label="Close compare">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="compare-sub" id="compare-sub">Side-by-side conditions for your pinned cities.</p>
+    <div class="compare-grid" id="compare-grid"></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
